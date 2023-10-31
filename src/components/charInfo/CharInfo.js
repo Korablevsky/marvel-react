@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { BrowserRouter as Routes } from "react-router-dom";
+
 import PropTypes from "prop-types";
 
 import Spinner from "../spinner/Spinner";
@@ -6,14 +8,13 @@ import ErrorMessage from "../errorMessage/ErrorMessage";
 import Skeleton from "../skeleton/Skeleton";
 
 import "./charInfo.scss";
-import MarvelService from "../../services/MarvelService";
+import useMarvelService from "../../services/MarvelService";
+import { Link } from "react-router-dom";
 
 const CharInfo = (props) => {
     const [char, setChar] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
 
-    const marvelService = new MarvelService();
+    const { loading, error, getCharacter, clearError } = useMarvelService();
 
     useEffect(() => {
         updateChar();
@@ -23,23 +24,12 @@ const CharInfo = (props) => {
         const { charId } = props;
         if (!charId) return;
 
-        onCharLoading();
-
-        marvelService.getCharacter(charId).then(onCharLoaded).catch(onError);
+        clearError();
+        getCharacter(charId).then(onCharLoaded);
     };
 
     const onCharLoaded = (char) => {
         setChar(char);
-        setLoading((loading) => false);
-    };
-
-    const onCharLoading = () => {
-        setLoading((loading) => true);
-    };
-
-    const onError = () => {
-        setLoading((loading) => false);
-        setError((error) => true);
     };
 
     const skeleton = char || loading || error ? null : <Skeleton />;
@@ -96,9 +86,9 @@ const View = ({ char }) => {
                     if (i > 9) return;
 
                     return (
-                        <li key={i} className="char__comics-item">
+                        <Link key={i} className="char__comics-item">
                             {item.name}
-                        </li>
+                        </Link>
                     );
                 })}
             </ul>
